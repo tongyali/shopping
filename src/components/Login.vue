@@ -4,31 +4,74 @@
       <div class="login_avatar">
         <img src="../assets/logo.png" alt="" />
       </div>
-      <div class="login_form">
-        <el-form ref="form" label-width="80px">
-          <el-form-item label="活动名称">
-            <el-input placeholder="请选择活动区域"></el-input>
-          </el-form-item>
-          <el-form-item label="活动名称">
-            <el-input></el-input>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="onSubmit">立即创建</el-button>
-            <el-button>取消</el-button>
-          </el-form-item>
-        </el-form>
-      </div>
+
+      <el-form
+        ref="loginFormRef"
+        class="login_form"
+        :model="loginForm"
+        :rules="rules"
+      >
+        <el-form-item prop="username">
+          <el-input
+            prefix-icon="iconfont icon-user"
+            v-model="loginForm.username"
+          ></el-input>
+        </el-form-item>
+        <el-form-item prop="password">
+          <el-input
+            prefix-icon="iconfont icon-3702mima"
+            v-model="loginForm.password"
+            type="password"
+          ></el-input>
+        </el-form-item>
+        <el-form-item class="btn_style">
+          <el-button type="primary" @click="login">登录</el-button>
+          <el-button type="info" @click="resetLogin">重置</el-button>
+        </el-form-item>
+      </el-form>
     </div>
   </div>
 </template>
 <script>
 export default {
-  methods: {
-    onSubmit() {
-      console.log("submit!");
-    },
+  data() {
+    return {
+      loginForm: {
+        username: 'admin',
+        password: 123456
+      },
+      rules: {
+        //表单校验
+        username: [
+          { required: true, message: '请输入登录名称', trigger: 'blur' },
+          { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入登录密码', trigger: 'blur' },
+          { min: 6, max: 15, message: '长度在6 到 15 个字符', trigger: 'blur' }
+        ]
+      }
+    }
   },
-};
+  methods: {
+    //获取表单元素  调用表单的重置方法
+    resetLogin() {
+      this.$refs.loginFormRef.resetFields()
+    },
+    login() {
+      this.$refs.loginFormRef.validate(async valid => {
+        if (!valid) return
+        const ret = await this.$http.post('login', this.loginForm)
+        if (ret.meta.status !== 200) return this.$message.error('登录失败')
+        this.$message.success('登录成功')
+        //将token存储在浏览器上
+        window.sessionStorage.setItem('token', ret.data.token)
+        //编程式导航  跳转至home页面
+        this.$router.push('/home')
+      })
+    }
+  }
+}
 </script>
 <style lang="less" scoped>
 .login_container {
@@ -68,5 +111,9 @@ export default {
   padding: 0 20px;
   width: 100%;
   box-sizing: border-box;
+}
+.btn_style {
+  display: flex;
+  justify-content: flex-end;
 }
 </style>
