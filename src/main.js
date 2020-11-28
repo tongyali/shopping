@@ -13,6 +13,13 @@ axios.interceptors.response.use(response => {
 }, err => {
   console.log(err)
 })
+//axios设置请求拦截器
+axios.interceptors.request.use(config => {
+  config.headers.Authorization = window.sessionStorage.getItem('token') //设置响应头
+  return config
+}, err => {
+  console.log(err)
+})
 Vue.prototype.$http = axios
 Vue.config.productionTip = false
 

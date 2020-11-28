@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Login from '../components/Login.vue'
 import Home from '../components/Home.vue'
+import Welcome from '../components/Welcome'
 Vue.use(VueRouter)
 
 const routes = [{
@@ -13,6 +14,11 @@ const routes = [{
 }, {
   path: '/home',
   component: Home,
+  redirect: '/welcome',
+  children: [{
+    path: '/welcome',
+    component: Welcome
+  }]
 }]
 
 const router = new VueRouter({
@@ -24,7 +30,7 @@ router.beforeEach((to, from, next) => {
   if (to.path == '/login') return next()
   //判断是否有token存在在浏览器
   const tokenStr = window.sessionStorage.getItem('token')
-  if (!tokenStr) return this.$router.push('/login')
+  if (!tokenStr) return next('/login')
   return next()
 })
 

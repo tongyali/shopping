@@ -38,7 +38,7 @@ export default {
     return {
       loginForm: {
         username: 'admin',
-        password: 123456
+        password: '123456'
       },
       rules: {
         //表单校验
@@ -62,6 +62,7 @@ export default {
       this.$refs.loginFormRef.validate(async valid => {
         if (!valid) return
         const ret = await this.$http.post('login', this.loginForm)
+        // console.log(ret)
         if (ret.meta.status !== 200) return this.$message.error('登录失败')
         this.$message.success('登录成功')
         //将token存储在浏览器上
