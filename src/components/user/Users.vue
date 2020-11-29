@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-breadcrumb separator-class="el-icon-arrow-right">
-      <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+      <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>活动管理</el-breadcrumb-item>
       <el-breadcrumb-item>活动列表</el-breadcrumb-item>
     </el-breadcrumb>
@@ -325,6 +325,9 @@ export default {
           if (ret.meta.status !== 200) return this.$message.error('删除失败')
           this.$message.success('删除成功')
           this.getUsersList()
+          if (this.userList.length === 1) {
+            this.userList.pagenum = this.pagenum - 1 ? this.pagenum - 1 : 1
+          }
         })
         .catch(() => {
           this.$message({
