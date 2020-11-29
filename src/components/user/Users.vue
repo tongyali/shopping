@@ -62,6 +62,7 @@
                   type="danger"
                   icon="el-icon-delete"
                   size="mini"
+                  @click="deleteUser(scope.row.id)"
                 ></el-button>
                 <el-tooltip
                   effect="dark"
@@ -129,7 +130,7 @@
         width="50%"
         @close="restEdit"
       >
-        <!-- 添加表单区域 -->
+        <!-- 编辑表单区域 -->
         <el-form
           :model="editForm"
           :rules="editUserRules"
@@ -293,15 +294,44 @@ export default {
       if (ret.meta.status !== 200) return this.$message.error('获取失败')
       this.editForm = ret.data
     },
+    //重置
     restEdit() {
       this.$refs.editUserFormRef.resetFields()
     },
+    //提交编辑
     editUser() {
-      this.$refs.editDialogVisible.validate(async valid => {
+      this.$refs.editUserFormRef.validate(async valid => {
         if (!valid) return
-        const ret = await this.$http.put(`users/this.editForm.id`)
-        console.log(ret)
+        const ret = await this.$http.put(`users/` + this.editForm.id, {
+          email: this.editForm.email,
+          mobile: this.editForm.mobile
+        })
+        if (ret.meta.status !== 200) return this.$message.error('更新失败')
+        this.editDialogVisible = false
+        this.getUsersList()
+        this.$message.success('更新成功')
       })
+    },
+    //删除
+    deleteUser(id) {
+      this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(async () => {
+          const ret = await this.$http.delete('users/' + id)
+          // console.log(ret)
+          if (ret.meta.status !== 200) return this.$message.error('删除失败')
+          this.$message.success('删除成功')
+          this.getUsersList()
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
     }
   }
 }
