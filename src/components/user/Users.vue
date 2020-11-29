@@ -8,15 +8,22 @@
     <el-card>
       <el-row :gutter="20">
         <el-col :span="8"
-          ><el-input placeholder="请输入内容" class="input-with-select">
+          ><el-input
+            placeholder="请输入内容"
+            class="input-with-select"
+            v-model="queryInfo.query"
+            clearable
+            @clear="getUsersList"
+          >
             <el-button
               slot="append"
               icon="el-icon-search"
+              @click="getUsersList"
             ></el-button> </el-input
         ></el-col>
-        <el-col :span="4"
-          ><el-button type="primary">添加用户</el-button></el-col
-        >
+        <el-col :span="4">
+          <el-button type="primary">添加用户</el-button>
+        </el-col>
       </el-row>
       <!-- 表格区域 -->
       <template>
@@ -31,7 +38,11 @@
             <template slot-scope="scope">
               <div>
                 <!-- {{ scope.row }} -->
-                <el-switch v-model="scope.row.mg_state"> </el-switch>
+                <el-switch
+                  v-model="scope.row.mg_state"
+                  @change="changeState(scope.row)"
+                >
+                </el-switch>
               </div>
             </template>
           </el-table-column>
@@ -49,16 +60,34 @@
                   icon="el-icon-delete"
                   size="mini"
                 ></el-button>
-                <el-button
-                  type="warning"
-                  icon="el-icon-setting"
-                  size="mini"
-                ></el-button>
+                <el-tooltip
+                  effect="dark"
+                  content="角色分配"
+                  placement="top"
+                  :enterable="false"
+                >
+                  <el-button
+                    type="warning"
+                    icon="el-icon-setting"
+                    size="mini"
+                  ></el-button>
+                </el-tooltip>
               </div>
             </template>
           </el-table-column>
         </el-table>
       </template>
+      <!-- 分页区 -->
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="queryInfo.pagenum"
+        :page-sizes="[1, 2, 5, 10]"
+        :page-size="queryInfo.pagesize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="total"
+      >
+      </el-pagination>
     </el-card>
   </div>
 </template>
@@ -84,6 +113,27 @@ export default {
       if (ret.meta.status !== 200) return this.$message.error('获取列表失败')
       this.total = ret.data.total
       this.userList = ret.data.users
+    },
+    //分页
+    handleSizeChange(newPageSize) {
+      this.queryInfo.pagesize = newPageSize
+      this.getUsersList()
+    },
+    handleCurrentChange(newPageNum) {
+      this.queryInfo.pagenum = newPageNum
+      this.getUsersList()
+    },
+    //改变状态
+    async changeState(data) {
+      const ret = await this.$http.put(
+        `users/${data.id}/state/${data.mg_state}`
+      )
+      if (ret.meta.status !== 200) {
+        data.mg_state = !data.mg_state
+        return this.$message.error('更新状态失败')
+      }
+      this.$message.success('更新状态成功')
+      this.getUsersList()
     }
   }
 }
